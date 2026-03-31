@@ -61,6 +61,59 @@ const getGroupMembers = async (groupId: string): Promise<GroupMember[]> => {
   });
 };
 
+app.post("/auth/login", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email || typeof email !== "string") {
+      return res.status(400).json({ error: "email es obligatorio." });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: email.trim().toLowerCase() },
+      select: { id: true, name: true, email: true, phone: true },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "Usuario no encontrado." });
+    }
+
+    return res.json(user);
+  } catch (error) {
+    console.error("Error en /auth/login:", error);
+    return res.status(500).json({ error: "Error interno iniciando sesión." });
+  }
+});
+
+app.post("/auth/register", async (req, res) => {
+  try {
+    const { name, email, phone } = req.body;
+    if (!name || !email || !phone) {
+      return res.status(400).json({ error: "name, email y phone son obligatorios." });
+    }
+
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    if (existing) {
+      return res.status(409).json({ error: "El email ya está registrado." });
+    }
+
+    const normalizedPhone = String(phone).replace(/\D/g, "");
+    const user = await prisma.user.create({
+      data: {
+        name: String(name).trim(),
+        email: normalizedEmail,
+        phone: normalizedPhone,
+      },
+      select: { id: true, name: true, email: true, phone: true },
+    });
+
+    return res.status(201).json(user);
+  } catch (error) {
+    console.error("Error en /auth/register:", error);
+    return res.status(500).json({ error: "Error interno registrando usuario." });
+  }
+});
+
 app.post("/expenses", async (req, res) => {
   try {
     const { description, amount, groupId, creatorId, isRecurring, dueDate } = req.body;
