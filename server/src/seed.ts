@@ -8,13 +8,13 @@ async function main() {
 
   const users = await prisma.$transaction([
     prisma.user.create({
-      data: { name: "Ana", email: "ana@example.com" },
+      data: { name: "Ana", email: "ana@example.com", phone: "34611111222" },
     }),
     prisma.user.create({
-      data: { name: "Bruno", email: "bruno@example.com" },
+      data: { name: "Bruno", email: "bruno@example.com", phone: "34633333444" },
     }),
     prisma.user.create({
-      data: { name: "Carla", email: "carla@example.com" },
+      data: { name: "Carla", email: "carla@example.com", phone: "34655555666" },
     }),
   ]);
 
@@ -35,12 +35,14 @@ async function main() {
   const splitAmount = 15 / 3;
 
   await prisma.debt.createMany({
-    data: users.map((user) => ({
-      amount: splitAmount,
-      debtorId: user.id,
-      creditorId: users[0].id,
-      expenseId: expense.id,
-    })),
+    data: users
+      .filter((user) => user.id !== users[0].id)
+      .map((user) => ({
+        amount: splitAmount,
+        debtorId: user.id,
+        creditorId: users[0].id,
+        expenseId: expense.id,
+      })),
   });
 
   console.log("Seed completado: Piso Compartido + Netflix (15/3).");
