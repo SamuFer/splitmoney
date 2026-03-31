@@ -1,0 +1,35 @@
+# Dependencias
+node_modules/
+dist/
+build/
+.cache/
+
+# Base de Datos (SQLite local)
+*.db
+*.db-journal
+
+# Variables de entorno (¡Muy importante no subirlas!)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDEs y editores
+.vscode/
+.idea/
+.cursor/
+*.swp
+*.swo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sistema Operativo
+.DS_Store
+Thumbs.db
+
+# Prisma generado (si no quieres versionar el cliente generado)
+# server/generated/

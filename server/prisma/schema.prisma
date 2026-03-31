@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id String @id @default(uuid())
+  name String
+  email String @unique
+
+  debts Debt[] @relation("Debtor")
+  credits Debt[] @relation("Creditor")
+
+  createdExpenses Expense[] @relation("ExpenseCreator")
+}
+
+model Group {
+  id String @id @default(uuid())
+  name String
+  expenses Expense[]
+}
+
+model Expense {
+  id String @id @default(uuid())
+  description String
+  amount Float
+  isRecurring Boolean
+  nextBillingDate DateTime?
+  dueDate DateTime?
+
+  groupId String
+  creatorId String
+
+  group Group @relation(fields: [groupId], references: [id])
+  creator User @relation("ExpenseCreator", fields: [creatorId], references: [id])
+
+  debts Debt[]
+}
+
+model Debt {
+  id String @id @default(uuid())
+  amount Float
+  isPaid Boolean @default(false)
+
+  debtorId String
+  creditorId String
+  expenseId String
+
+  debtor User @relation("Debtor", fields: [debtorId], references: [id])
+  creditor User @relation("Creditor", fields: [creditorId], references: [id])
+  expense Expense @relation(fields: [expenseId], references: [id])
+}
